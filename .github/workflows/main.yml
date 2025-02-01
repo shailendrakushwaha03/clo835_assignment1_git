@@ -68,10 +68,10 @@ jobs:
           docker pull $ECR_REGISTRY/mysql-assignment1:mysql
           
           # Create Docker network
-          docker network create assignment-network || true
+          docker network create assignment-network1 || true
           
           # Run MySQL container
-          docker run -d --name sql_container --network assignment-network \
+          docker run -d --name sql_container --network assignment-network1 \
             -e MYSQL_ROOT_PASSWORD=db_pass123 -e MYSQL_DATABASE=mydb \
             -p 3306:3306 $ECR_REGISTRY/mysql-assignment1:mysql
 
@@ -79,17 +79,17 @@ jobs:
           sleep 15
           
           # Run web application containers
-          docker run -d --name blue-container --network assignment-network \
+          docker run -d --name blue-container --network assignment-network1 \
             -e DBHOST=sql_container -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 \
             -e DATABASE=mydb -e APP_COLOR=blue -p 8081:8080 \
             $ECR_REGISTRY/webapp-assignment1:mywebapp
 
-          docker run -d --name pink-container --network assignment-network \
+          docker run -d --name pink-container --network assignment-network1 \
             -e DBHOST=sql_container -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 \
             -e DATABASE=mydb -e APP_COLOR=pink -p 8082:8080 \
             $ECR_REGISTRY/webapp-assignment1:mywebapp
 
-          docker run -d --name lime-container --network assignment-network \
+          docker run -d --name lime-container --network assignment-network1 \
             -e DBHOST=sql_container -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 \
             -e DATABASE=mydb -e APP_COLOR=lime -p 8083:8080 \
             $ECR_REGISTRY/webapp-assignment1:mywebapp
