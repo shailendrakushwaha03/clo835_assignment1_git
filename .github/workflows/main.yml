@@ -13,21 +13,13 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Configure AWS Credentials
-      run: |
-        mkdir -p ~/.aws
-        echo "[default]" > ~/.aws/credentials
-        echo "aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-        echo "aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-        if [ -n "${{ secrets.AWS_SESSION_TOKEN }}" ]; then
-          echo "aws_session_token = ${{ secrets.AWS_SESSION_TOKEN }}" >> ~/.aws/credentials
-        fi
-        echo "AWS credentials configured successfully."
-
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
       env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}  # Only if using temporary credentials
         AWS_REGION: us-east-1
 
     - name: Build, test, tag, and push application image to Amazon ECR
@@ -82,9 +74,13 @@ jobs:
     - name: Pull Docker images from Amazon ECR and run containers
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}  # Only if using temporary credentials
+        AWS_REGION: us-east-1
       run: |
         # Log in to ECR and pull the Docker images
-        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
         docker pull $ECR_REGISTRY/webapp-assignment1:application-mywebapp
         docker pull $ECR_REGISTRY/mysql-assignment1:mysql-mysql
 
