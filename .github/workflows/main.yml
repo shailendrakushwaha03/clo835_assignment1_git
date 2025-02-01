@@ -65,14 +65,14 @@ jobs:
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
       
           # Create Docker network
-          docker network create assignment-network2 || true
+          docker network create assignment-network3 || true
 
           # Pull Docker images
           docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
           docker pull $ECR_REGISTRY/mysql-assignment1:mysql
           
           # Run MySQL container
-          docker run -d --name sql_container --network assignment-network2 \
+          docker run -d --name sql_container --network assignment-network3 \
             -e MYSQL_ROOT_PASSWORD=db_pass123 -e MYSQL_DATABASE=mydb \
             -p 3306:3306 $ECR_REGISTRY/mysql-assignment1:mysql
 
@@ -80,17 +80,17 @@ jobs:
           sleep 15
           
           # Run web application containers
-          docker run -d --name blue-container --network assignment-network2 \
+          docker run -d --name blue-container --network assignment-network3 \
             -e DBHOST=sql_container -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 \
             -e DATABASE=mydb -e APP_COLOR=blue -p 8081:8080 \
             $ECR_REGISTRY/webapp-assignment1:mywebapp
 
-          docker run -d --name pink-container --network assignment-network2 \
+          docker run -d --name pink-container --network assignment-network3 \
             -e DBHOST=sql_container -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 \
             -e DATABASE=mydb -e APP_COLOR=pink -p 8082:8080 \
             $ECR_REGISTRY/webapp-assignment1:mywebapp
 
-          docker run -d --name lime-container --network assignment-network2 \
+          docker run -d --name lime-container --network assignment-network3 \
             -e DBHOST=sql_container -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 \
             -e DATABASE=mydb -e APP_COLOR=lime -p 8083:8080 \
             $ECR_REGISTRY/webapp-assignment1:mywebapp
