@@ -28,7 +28,8 @@ jobs:
         ECR_REPOSITORY: webapp-assignment1
         APPLICATION_IMAGE_TAG: mywebapp
       run: |
-        # Docker build and push application image
+        # Docker build and push application image 
+        cd flaskapp/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:application-$APPLICATION_IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:application-$APPLICATION_IMAGE_TAG
 
@@ -39,5 +40,6 @@ jobs:
         MYSQL_IMAGE_TAG: mysql
       run: |
         # Docker build and push MySQL image
+        cd flaskapp/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:mysql-$MYSQL_IMAGE_TAG -f Dockerfile_mysql .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:mysql-$MYSQL_IMAGE_TAG
