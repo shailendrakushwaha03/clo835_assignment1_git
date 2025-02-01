@@ -61,9 +61,10 @@ jobs:
           sudo usermod -aG docker ec2-user
         
           # Authenticate to AWS ECR
-          id=$(aws sts get-caller-identity --query Account --output text)
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $id.ecr.us-east-1.amazonaws.com
-          
+          ECR_REGISTRY=$(aws ecr get-login-password --region us-east-1 | awk -F'.' '{print $1}')
+          echo "ECR Registry ID: $ECR_REGISTRY"
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY.dkr.ecr.us-east-1.amazonaws.com
+                    
           # Create Docker network
           docker network create assignment-network2 || true
 
