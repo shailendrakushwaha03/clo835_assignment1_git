@@ -63,7 +63,7 @@ jobs:
         EC2_HOST: ${{ secrets.EC2_HOST }}
       run: |
         # Start the SSH agent and add the SSH private key
-        echo "$EC2_SSH_KEY" | ssh-agent bash -c 'ssh-add /dev/stdin; ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
+        echo "${{ secrets.EC2_SSH_KEY }}" | ssh-agent bash -c 'ssh-add /dev/stdin; ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
           sudo yum update -y
           sudo yum install -y docker
           sudo systemctl start docker
@@ -71,13 +71,17 @@ jobs:
           sudo usermod -aG docker ec2-user
         EOF'
 
-      # Pull the application image from ECR
-      aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-      docker pull ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
-      docker pull ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
+    - name: Pull Docker images from Amazon ECR and run containers
+      env:
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+      run: |
+        # Log in to ECR and pull the Docker images
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+        docker pull $ECR_REGISTRY/webapp-assignment1:application-mywebapp
+        docker pull $ECR_REGISTRY/mysql-assignment1:mysql-mysql
 
-      # Run MySQL container
-      docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
+        # Run MySQL container
+        docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 $ECR_REGISTRY/mysql-assignment1:mysql-mysql
 
-      # Run the application container
-      docker run -d --name webapp-container -p 80:80 --link mysql-container ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
+        # Run the application container
+        docker run -d --name webapp-container -p 80:80 --link mysql-container $ECR_REGISTRY/webapp-assignment1:application-mywebapp
