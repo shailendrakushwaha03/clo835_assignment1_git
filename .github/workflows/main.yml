@@ -78,12 +78,12 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         # Log in to ECR and pull the Docker images
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password stdin ${{ steps.login-ecr.outputs.registry }}
         docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
         docker pull $ECR_REGISTRY/mysql-assignment1:mysql
 
-        docker create network assignment-network
-
+        docker network create assignment-network
+        
         # Run MySQL container
         docker run -d --name sql_container --network assignment-network -e MYSQL_ROOT_PASSWORD=db_pass123 -p 3306:3306 $ECR_REGISTRY/mysql-assignment1:mysql
 
