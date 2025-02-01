@@ -58,24 +58,26 @@ jobs:
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
     - name: Configure EC2 instance and install Docker
+      env:
+        EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
       run: |
-        echo "$EC2_SSH_KEY" > private_key.pem
-        chmod 600 private_key.pem
-        ssh -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+        # Start the SSH agent and add the SSH private key
+        echo "$EC2_SSH_KEY" | ssh-agent bash -c 'ssh-add /dev/stdin; ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
           sudo yum update -y
           sudo yum install -y docker
           sudo systemctl start docker
           sudo systemctl enable docker
           sudo usermod -aG docker ec2-user
-        EOF
+        EOF'
 
-        # Pull the application image from ECR
-        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-        docker pull ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
-        docker pull ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
+      # Pull the application image from ECR
+      aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+      docker pull ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
+      docker pull ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
 
-        # Run MySQL container
-        docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
+      # Run MySQL container
+      docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
 
-        # Run the application container
-        docker run -d --name webapp-container -p 80:80 --link mysql-container ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
+      # Run the application container
+      docker run -d --name webapp-container -p 80:80 --link mysql-container ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
