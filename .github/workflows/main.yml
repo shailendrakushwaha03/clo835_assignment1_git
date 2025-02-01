@@ -59,8 +59,8 @@ jobs:
           sudo systemctl start docker
           sudo systemctl enable docker
           sudo usermod -aG docker ec2-user
-          EOF
-
+        EOF
+        
     - name: Pull Docker images from Amazon ECR and run containers
       env:
         AWS_REGION: us-east-1
