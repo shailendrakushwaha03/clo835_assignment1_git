@@ -19,7 +19,7 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}  # Only if using temporary credentials
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
         AWS_REGION: us-east-1
 
     - name: Build, test, tag, and push application image to Amazon ECR
@@ -72,12 +72,6 @@ jobs:
         EOF'
 
     - name: Pull Docker images from Amazon ECR and run containers
-      env:
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}  # Only if using temporary credentials
-        AWS_REGION: us-east-1
       run: |
         # Log in to ECR and pull the Docker images
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
