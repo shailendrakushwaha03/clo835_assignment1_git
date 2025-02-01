@@ -57,28 +57,23 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Configure AWS Credentials
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          << 'EOF'
+    - name: Configure EC2 instance and install Docker
+      run: |
+        ssh -i ${{ secrets.EC2_SSH_KEY }} ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
           sudo yum update -y
           sudo yum install -y docker
           sudo systemctl start docker
           sudo systemctl enable docker
           sudo usermod -aG docker ec2-user
-          EOF
+        EOF
 
-          # Pull the application image from ECR
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-          docker pull ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
-          docker pull ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
+        # Pull the application image from ECR
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+        docker pull ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
+        docker pull ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
 
-          # Run MySQL container
-          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
+        # Run MySQL container
+        docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 ${{ secrets.ECR_REGISTRY }}/mysql-assignment1:mysql-mysql
 
-          # Run the application container
-          docker run -d --name webapp-container -p 80:80 --link mysql-container ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
+        # Run the application container
+        docker run -d --name webapp-container -p 80:80 --link mysql-container ${{ secrets.ECR_REGISTRY }}/webapp-assignment1:application-mywebapp
