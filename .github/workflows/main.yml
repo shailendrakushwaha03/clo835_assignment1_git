@@ -78,7 +78,7 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         # Log in to ECR and pull the Docker images
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password stdin ${{ steps.login-ecr.outputs.registry }}
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
         docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
         docker pull $ECR_REGISTRY/mysql-assignment1:mysql
 
