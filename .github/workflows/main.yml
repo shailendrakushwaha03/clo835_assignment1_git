@@ -41,7 +41,7 @@ jobs:
         ECR_REPOSITORY: mysql-assignment1
         MYSQL_IMAGE_TAG: mysql
       run: |
-        # Docker build and push MySQL image
+        # Docker build and push MySQL images
         cd flaskapp/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$MYSQL_IMAGE_TAG -f Dockerfile_mysql .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$MYSQL_IMAGE_TAG
