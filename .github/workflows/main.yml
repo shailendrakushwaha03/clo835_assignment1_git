@@ -60,12 +60,13 @@ jobs:
           sudo systemctl enable docker
           sudo usermod -aG docker ec2-user
         EOF
-        
+
     - name: Pull Docker images from Amazon ECR and run containers
       env:
         AWS_REGION: us-east-1
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
+        << 'EOF'
         # Log in to ECR and pull the Docker images
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
         docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
@@ -84,3 +85,5 @@ jobs:
 
         docker ps
         docker ps -a
+        
+        EOF
