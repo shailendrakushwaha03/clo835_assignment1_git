@@ -32,7 +32,7 @@ jobs:
       run: |
         # Docker build and push application image 
         cd flaskapp/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:application-$APPLICATION_IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$APPLICATION_IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$APPLICATION_IMAGE_TAG
 
     - name: Build, test, tag, and push MySQL image to Amazon ECR
@@ -43,7 +43,7 @@ jobs:
       run: |
         # Docker build and push MySQL image
         cd flaskapp/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:mysql-$MYSQL_IMAGE_TAG -f Dockerfile_mysql .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$MYSQL_IMAGE_TAG -f Dockerfile_mysql .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$MYSQL_IMAGE_TAG
 
     - name: Add SSH private key
