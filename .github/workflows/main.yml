@@ -1,11 +1,14 @@
 name: Deploy to ECR
-#123
 on: 
-  push:
-    branches: [ master ]
+  pull_request:
+    branches: 
+      - master
+    types:
+      - closed
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true
     name: Build and Push Images
     runs-on: ubuntu-latest
 
