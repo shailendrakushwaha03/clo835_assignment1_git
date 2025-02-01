@@ -78,12 +78,12 @@ jobs:
         EOF'
 
     - name: Pull Docker images from Amazon ECR and run containers
-        env:
-          AWS_REGION: us-east-1
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+      env:
+        AWS_REGION: us-east-1
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       run: |
         # Log in to ECR and pull the Docker images
 
