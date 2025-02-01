@@ -53,17 +53,13 @@ jobs:
 
     - name: SSH into EC2 and configure Docker
       run: |
-        ssh -t -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
           sudo yum update -y
           sudo yum install -y docker
           sudo systemctl start docker
           sudo systemctl enable docker
           sudo usermod -aG docker ec2-user
-          # Ensure the Docker image is pulled from the correct ECR registry
-          sudo docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
-          sudo docker pull $ECR_REGISTRY/mysql-assignment1:mysql
-          sudo docker run -d --name your-container-name $ECR_REGISTRY/webapp-assignment1:mywebapp
-        EOF
+          EOF
 
     - name: Pull Docker images from Amazon ECR and run containers
       env:
