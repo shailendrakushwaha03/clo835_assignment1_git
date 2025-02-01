@@ -33,7 +33,7 @@ locals {
 resource "aws_instance" "ec2" {
   ami           = data.aws_ami.latest_amazon_linux.id
   instance_type = var.instance_type
-  # key_name                    = aws_key_pair.web_key.key_name                                 
+  key_name                    = aws_key_pair.web_key.key_name                                 
   subnet_id                   = data.terraform_remote_state.network.outputs.public_subnet_ids
   security_groups             = [aws_security_group.security-group.id]
   associate_public_ip_address = true
@@ -78,8 +78,8 @@ resource "aws_security_group" "security-group" {
 }
 
 # Adding SSH key to Amazon EC2
-# resource "aws_key_pair" "web_key" {
-#   key_name   = local.name_prefix
-#   public_key = file("assignment1.pub") 
-# }
+resource "aws_key_pair" "web_key" {
+  key_name   = "key"
+  public_key = file("key.pub") 
+}
 
