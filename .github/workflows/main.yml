@@ -61,6 +61,12 @@ jobs:
       env:
         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         EC2_HOST: ${{ secrets.EC2_HOST }}
+
+        AWS_REGION: us-east-1
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}  # Ensure this is set in GitHub Secrets
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       run: |
         # Start the SSH agent and add the SSH private key
         echo "${{ secrets.EC2_SSH_KEY }}" | ssh-agent bash -c 'ssh-add /dev/stdin; ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
@@ -71,13 +77,7 @@ jobs:
           sudo usermod -aG docker ec2-user
         EOF'
 
-      - name: Pull Docker images from Amazon ECR and run containers
-      env:
-        AWS_REGION: us-east-1
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}  # Ensure this is set in GitHub Secrets
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+    - name: Pull Docker images from Amazon ECR and run containers
       run: |
         # Log in to ECR and pull the Docker images
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
