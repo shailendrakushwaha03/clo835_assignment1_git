@@ -61,14 +61,15 @@ jobs:
           sudo usermod -aG docker ec2-user
         
           # Authenticate to AWS ECR
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-          
-          # Pull Docker images
-          docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
-          docker pull $ECR_REGISTRY/mysql-assignment1:mysql
+          id=$(aws sts get-caller-identity --query Account --output text)
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $id.ecr.us-east-1.amazonaws.com
           
           # Create Docker network
           docker network create assignment-network1 || true
+
+          # Pull Docker images
+          docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
+          docker pull $ECR_REGISTRY/mysql-assignment1:mysql
           
           # Run MySQL container
           docker run -d --name sql_container --network assignment-network1 \
