@@ -1,4 +1,5 @@
 name: Deploy to ECR
+
 on: 
   push:
     branches: [ master ]
@@ -30,7 +31,6 @@ jobs:
         ECR_REPOSITORY: webapp-assignment1
         APPLICATION_IMAGE_TAG: mywebapp
       run: |
-        # Docker build and push application image 
         cd flaskapp/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$APPLICATION_IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$APPLICATION_IMAGE_TAG
@@ -41,7 +41,6 @@ jobs:
         ECR_REPOSITORY: mysql-assignment1
         MYSQL_IMAGE_TAG: mysql
       run: |
-        # Docker build and push MySQL images
         cd flaskapp/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$MYSQL_IMAGE_TAG -f Dockerfile_mysql .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$MYSQL_IMAGE_TAG
@@ -49,7 +48,7 @@ jobs:
     - name: Set up SSH key for EC2
       run: |
         mkdir -p ~/.ssh
-        echo "${{secrets.EC2_SSH_KEY}}" > ~/.ssh/key.pem
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/key.pem
         chmod 600 ~/.ssh/key.pem
 
     - name: SSH into EC2 and configure Docker
@@ -60,7 +59,10 @@ jobs:
           sudo systemctl start docker
           sudo systemctl enable docker
           sudo usermod -aG docker ec2-user
-          sudo docker run -d --name your-container-name your-image-name
+          # Ensure the Docker image is pulled from the correct ECR registry
+          sudo docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
+          sudo docker pull $ECR_REGISTRY/mysql-assignment1:mysql
+          sudo docker run -d --name your-container-name $ECR_REGISTRY/webapp-assignment1:mywebapp
         EOF
 
     - name: Pull Docker images from Amazon ECR and run containers
@@ -69,12 +71,12 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         # Log in to ECR and pull the Docker images
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
         docker pull $ECR_REGISTRY/webapp-assignment1:mywebapp
         docker pull $ECR_REGISTRY/mysql-assignment1:mysql
 
         docker network create assignment-network
-        
+
         # Run MySQL container
         docker run -d --name sql_container --network assignment-network -e MYSQL_ROOT_PASSWORD=db_pass123 -e MYSQL_DATABASE=mydb -p 3306:3306 $ECR_REGISTRY/mysql-assignment1:mysql
 
