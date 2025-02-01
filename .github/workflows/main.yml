@@ -1,5 +1,5 @@
 name: Deploy to ECR
-#deploy
+# deploy
 on: 
   push:
     branches: [ master ]
@@ -13,14 +13,17 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Set up AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: us-east-1
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-        AWS_REGION: us-east-1
 
     - name: Build, test, tag, and push application image to Amazon ECR
       env:
@@ -44,12 +47,6 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:mysql-$MYSQL_IMAGE_TAG -f Dockerfile_mysql .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:mysql-$MYSQL_IMAGE_TAG
 
-  deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
     - name: Add SSH private key
       run: |
         mkdir -p ~/.ssh
@@ -61,9 +58,8 @@ jobs:
       env:
         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         EC2_HOST: ${{ secrets.EC2_HOST }}
-
         AWS_REGION: us-east-1
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}  # Ensure this is set in GitHub Secrets
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
@@ -80,10 +76,8 @@ jobs:
     - name: Pull Docker images from Amazon ECR and run containers
       env:
         AWS_REGION: us-east-1
-        
       run: |
         # Log in to ECR and pull the Docker images
-
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
         docker pull $ECR_REGISTRY/webapp-assignment1:application-mywebapp
         docker pull $ECR_REGISTRY/mysql-assignment1:mysql-mysql
@@ -91,8 +85,8 @@ jobs:
         # Run MySQL container
         docker run -d --name sql_container --network assignment-network -e MYSQL_ROOT_PASSWORD=db_pass123 -p 3306:3306 990835861266.dkr.ecr.us-east-1.amazonaws.com/mysql-assignment1:sql_image
 
-        docker run -d --name blue-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=blue -p 8081:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images 
+        docker run -d --name blue-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=blue -p 8081:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images
 
-        docker run -d --name pink-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=pink -p 8082:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images 
+        docker run -d --name pink-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=pink -p 8082:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images
 
-        docker run -d --name lime-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=lime -p 8083:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images 
+        docker run -d --name lime-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=lime -p 8083:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images
