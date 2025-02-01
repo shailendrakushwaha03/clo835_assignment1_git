@@ -53,8 +53,7 @@ jobs:
 
     - name: SSH into EC2 and configure Docker container
       run: |
-        ssh -t -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-          
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
           mkdir ~p ~/.aws
           cat <<EOT > ~/.aws/credentials
           [default]
@@ -97,4 +96,4 @@ jobs:
 
           # Show running containers
           docker ps -a
-        EOF
+          EOF
