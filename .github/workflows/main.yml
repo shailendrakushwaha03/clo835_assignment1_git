@@ -92,3 +92,6 @@ jobs:
         docker run -d --name pink-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=pink -p 8082:8080 $ECR_REGISTRY/webapp-assignment1:mywebapp
 
         docker run -d --name lime-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=lime -p 8083:8080 $ECR_REGISTRY/webapp-assignment1:mywebapp
+
+        docker ps
+        docker ps -a
