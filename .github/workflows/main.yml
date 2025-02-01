@@ -64,14 +64,13 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Update and install dependencies
+          << 'EOF'
           sudo yum update -y
-          sudo yum install -y docker mysql
-
-          # Start Docker service
+          sudo yum install -y docker
           sudo systemctl start docker
           sudo systemctl enable docker
           sudo usermod -aG docker ec2-user
+          EOF
 
           # Pull the application image from ECR
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
