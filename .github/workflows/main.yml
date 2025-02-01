@@ -1,5 +1,4 @@
 name: Deploy to ECR
-# deploy
 on: 
   push:
     branches: [ master ]
