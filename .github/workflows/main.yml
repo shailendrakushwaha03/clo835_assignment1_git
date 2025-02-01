@@ -76,6 +76,7 @@ jobs:
     - name: Pull Docker images from Amazon ECR and run containers
       env:
         AWS_REGION: us-east-1
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         # Log in to ECR and pull the Docker images
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
@@ -83,10 +84,10 @@ jobs:
         docker pull $ECR_REGISTRY/mysql-assignment1:mysql-mysql
 
         # Run MySQL container
-        docker run -d --name sql_container --network assignment-network -e MYSQL_ROOT_PASSWORD=db_pass123 -p 3306:3306 990835861266.dkr.ecr.us-east-1.amazonaws.com/mysql-assignment1:sql_image
+        docker run -d --name sql_container --network assignment-network -e MYSQL_ROOT_PASSWORD=db_pass123 -p 3306:3306 $ECR_REGISTRY/mysql-assignment1:sql_image
 
-        docker run -d --name blue-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=blue -p 8081:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images
+        docker run -d --name blue-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=blue -p 8081:8080 $ECR_REGISTRY/webapp-assignment1:webapp_images
 
-        docker run -d --name pink-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=pink -p 8082:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images
+        docker run -d --name pink-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=pink -p 8082:8080 $ECR_REGISTRY/webapp-assignment1:webapp_images
 
-        docker run -d --name lime-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=lime -p 8083:8080 990835861266.dkr.ecr.us-east-1.amazonaws.com/webapp-assignment1:webapp_images
+        docker run -d --name lime-container --network assignment-network -e DBHOST=mysql-db -e DBPORT=3306 -e DBUSER=root -e DBPWD=db_pass123 -e DATABASE=mydb -e APP_COLOR=lime -p 8083:8080 $ECR_REGISTRY/webapp-assignment1:webapp_images
