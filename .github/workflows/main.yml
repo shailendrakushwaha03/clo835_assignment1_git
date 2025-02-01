@@ -80,6 +80,7 @@ jobs:
     - name: Pull Docker images from Amazon ECR and run containers
       run: |
         # Log in to ECR and pull the Docker images
+        export AWS_REGION=us-east-1
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
         docker pull $ECR_REGISTRY/webapp-assignment1:application-mywebapp
         docker pull $ECR_REGISTRY/mysql-assignment1:mysql-mysql
